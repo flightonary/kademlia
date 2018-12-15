@@ -15,8 +15,10 @@ func GetHostIp() (net.IP, error) {
 
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			kadlog.debugln("host ip is", ipnet.IP)
-			return ipnet.IP, nil
+			if ipnet.IP.To4() != nil {
+				kadlog.debugln("host ip is", ipnet.IP)
+				return ipnet.IP, nil
+			}
 		}
 	}
 	return nil, errors.New("can not find ip address other than loopback")
