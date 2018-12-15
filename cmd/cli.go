@@ -1,12 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"log"
+
 	"github.com/flightonary/kademlia"
 )
 
 func main() {
-	kad := &kademlia.Kademlia{}
-	kad.Bootstrap("localhost")
-	fmt.Print("ok")
+	node := kademlia.Node{}
+	node.Id = kademlia.GenerateRondomId()
+	node.IP, _ = kademlia.GetHostIp()
+	node.Port = 7001
+
+	kad := kademlia.NewKademlia(node)
+
+	err := kad.Bootstrap("localhost", 7009)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("ok")
 }

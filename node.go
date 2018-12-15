@@ -6,10 +6,10 @@ const (
 	KadIdLen = 160 // bits
 )
 
-type kadId [KadIdLen/8]byte
+type KadId [KadIdLen / 8]byte
 
-type node struct {
-	id kadId
-	ip net.IP
-	port int
+type Node struct {
+	Id   KadId
+	IP   net.IP
+	Port int
 }
