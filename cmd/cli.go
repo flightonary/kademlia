@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
-	kad := kademlia.NewKademlia()
-	fmt.Print(kad.Status())
+	kad := &kademlia.Kademlia{}
+	kad.Bootstrap("localhost")
+	fmt.Print("ok")
 }
