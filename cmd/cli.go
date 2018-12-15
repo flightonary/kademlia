@@ -7,10 +7,12 @@ import (
 )
 
 func main() {
-	node := kademlia.Node{}
-	node.Id = kademlia.GenerateRondomId()
-	node.IP, _ = kademlia.GetHostIp()
-	node.Port = 7001
+	kademlia.SetLogLevelDebug()
+
+	id := kademlia.GenerateRandomId()
+	ip, _ := kademlia.GetHostIp()
+	port := 7001
+	node, _ := kademlia.NewNode(id, ip, port)
 
 	kad := kademlia.NewKademlia(node)
 
@@ -19,5 +21,5 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	log.Println("ok")
+	log.Println("done")
 }

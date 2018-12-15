@@ -17,9 +17,9 @@ type Kademlia struct {
 	mainChan chan ctrlCmd
 }
 
-func NewKademlia(own Node) *Kademlia {
+func NewKademlia(own *Node) *Kademlia {
 	kad := &Kademlia{}
-	kad.own = &own
+	kad.own = own
 	kad.nodes = []*Node{}
 	kad.mainChan = make(chan ctrlCmd, 10)
 	return kad

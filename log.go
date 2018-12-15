@@ -33,7 +33,7 @@ func (l *logger) debugln(v ...interface{}) {
 
 func (l *logger) debugf(format string, v ...interface{}) {
 	if l.loglevel <= logLevelDebug {
-		log.Print(format, debugPrefix, v)
+		log.Print(debugPrefix + format, v)
 	}
 }
 
@@ -51,8 +51,16 @@ func (l *logger) infoln(v ...interface{}) {
 
 func (l *logger) infof(format string, v ...interface{}) {
 	if l.loglevel <= logLevelInfo {
-		log.Print(format, infoPrefix, v)
+		log.Print(infoPrefix + format, v)
 	}
+}
+
+func SetLogLevelDebug() {
+	kadlog.loglevel = logLevelDebug
+}
+
+func SetLogLevelInfo() {
+	kadlog.loglevel = logLevelInfo
 }
 
 func DisableLog() {

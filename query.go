@@ -24,15 +24,15 @@ type kademliaMessage struct {
 }
 
 type pingQuery struct {
-	target KadId
+	target []byte
 }
 
 type findNodeQuery struct {
-	target KadId
+	target []byte
 }
 
 type findValueQuery struct {
-	target KadId
+	target []byte
 }
 
 type dataStoreQuery struct {
@@ -40,7 +40,7 @@ type dataStoreQuery struct {
 }
 
 type pingReply struct {
-	target KadId
+	target []byte
 }
 
 type findNodeReply struct {
