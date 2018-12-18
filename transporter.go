@@ -83,7 +83,7 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 					continue
 				}
 
-				_, err = conn.WriteToUDP([]byte("data"), dst)
+				_, err = conn.WriteToUDP(sendMsg.data, dst)
 				if err != nil {
 					// TODO: return err via rcvChan or errChan
 					continue
