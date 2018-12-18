@@ -26,7 +26,7 @@ func GetHostIp() (net.IP, error) {
 
 func GenerateRandomId() []byte {
 	rand.Seed(time.Now().UnixNano())
-	buff := make([]byte, KadIdLen / 8)
+	buff := make([]byte, KadIdLen/8)
 	rand.Read(buff)
 	return buff
 }

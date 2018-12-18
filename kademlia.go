@@ -12,9 +12,10 @@ type findNodeCmd struct {
 }
 
 type Kademlia struct {
-	own      *Node
-	nodes    []*Node
-	mainChan chan ctrlCmd
+	own         *Node
+	nodes       []*Node
+	mainChan    chan ctrlCmd
+	transporter transporter
 }
 
 func NewKademlia(own *Node) *Kademlia {

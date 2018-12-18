@@ -10,7 +10,7 @@ const (
 
 const (
 	debugPrefix = "[Kademlia:DEBUG] "
-	infoPrefix =  "[Kademlia:INFO] "
+	infoPrefix  = "[Kademlia:INFO] "
 )
 
 var kadlog = logger{logLevelInfo}
@@ -33,7 +33,7 @@ func (l *logger) debugln(v ...interface{}) {
 
 func (l *logger) debugf(format string, v ...interface{}) {
 	if l.loglevel <= logLevelDebug {
-		log.Print(debugPrefix + format, v)
+		log.Print(debugPrefix+format, v)
 	}
 }
 
@@ -51,7 +51,7 @@ func (l *logger) infoln(v ...interface{}) {
 
 func (l *logger) infof(format string, v ...interface{}) {
 	if l.loglevel <= logLevelInfo {
-		log.Print(infoPrefix + format, v)
+		log.Print(infoPrefix+format, v)
 	}
 }
 
