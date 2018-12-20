@@ -21,7 +21,7 @@ type transporter interface {
 	run(net.IP, int) error
 	stop()
 	send(*sendMsg)
-	getReceiveChannel() chan *rcvMsg
+	receiveChannel() chan *rcvMsg
 }
 
 func newUdpTransporter() *udpTransporter {
@@ -95,6 +95,6 @@ func (ut *udpTransporter) send(msg *sendMsg) {
 	ut.sendChan <- msg
 }
 
-func (ut *udpTransporter) getReceiveChannel() chan *rcvMsg {
+func (ut *udpTransporter) receiveChannel() chan *rcvMsg {
 	return ut.rcvChan
 }
