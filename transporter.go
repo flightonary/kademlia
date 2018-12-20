@@ -70,21 +70,14 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 	}()
 
 	go func() {
-		for {
-			sendMsg, ok := <-ut.sendChan
-			if ok {
-				dst := &net.UDPAddr{sendMsg.destIp, sendMsg.destPort, ""}
-
-				_, err = conn.WriteToUDP(sendMsg.data, dst)
-				if err != nil {
-					// TODO: return err via rcvChan or errChan
-					continue
-				}
-			} else {
-				kadlog.debug("stopped running udpTransporter @ sender goroutine")
-				break
+		for sendMsg := range ut.sendChan {
+			dst := &net.UDPAddr{sendMsg.destIp, sendMsg.destPort, ""}
+			_, err = conn.WriteToUDP(sendMsg.data, dst)
+			if err != nil {
+				// TODO: return err via rcvChan or errChan
 			}
 		}
+		kadlog.debug("stopped running udpTransporter @ sender goroutine")
 	}()
 
 	return nil
