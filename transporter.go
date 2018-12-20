@@ -1,7 +1,6 @@
 package kademlia
 
 import (
-	"fmt"
 	"net"
 )
 
@@ -37,10 +36,7 @@ type udpTransporter struct {
 }
 
 func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
-	src, err := net.ResolveUDPAddr("udp", joinHostPort(listenIp, listenPort))
-	if err != nil {
-		return err
-	}
+	src := &net.UDPAddr{listenIp, listenPort, ""}
 
 	conn, err := net.ListenUDP("udp", src)
 	if err != nil {
@@ -77,11 +73,7 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 		for {
 			sendMsg, ok := <-ut.sendChan
 			if ok {
-				dst, err := net.ResolveUDPAddr("udp", joinHostPort(sendMsg.destIp, sendMsg.destPort))
-				if err != nil {
-					// TODO: return err via rcvChan or errChan
-					continue
-				}
+				dst := &net.UDPAddr{sendMsg.destIp, sendMsg.destPort, ""}
 
 				_, err = conn.WriteToUDP(sendMsg.data, dst)
 				if err != nil {
@@ -104,8 +96,4 @@ func (ut *udpTransporter) stop() {
 	close(ut.rcvChan)
 	_ = ut.conn.Close()
 	ut.conn = nil
-}
-
-func joinHostPort(ip net.IP, port int) string {
-	return fmt.Sprintf("%s:%d", ip.String(), port)
 }
