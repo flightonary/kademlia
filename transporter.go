@@ -37,12 +37,12 @@ type udpTransporter struct {
 }
 
 func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
-	udpAddr, err := net.ResolveUDPAddr("udp", joinHostPort(listenIp, listenPort))
+	src, err := net.ResolveUDPAddr("udp", joinHostPort(listenIp, listenPort))
 	if err != nil {
 		return err
 	}
 
-	conn, err := net.ListenUDP("udp", udpAddr)
+	conn, err := net.ListenUDP("udp", src)
 	if err != nil {
 		return err
 	}

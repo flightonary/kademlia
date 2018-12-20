@@ -6,6 +6,8 @@ import (
 )
 
 func TestSendAndReceive(t *testing.T) {
+	SetLogLevelDebug()
+
 	listenIp := net.ParseIP("0.0.0.0")
 	local := net.ParseIP("127.0.0.1")
 	serverPort := 7001
@@ -35,4 +37,7 @@ func TestSendAndReceive(t *testing.T) {
 	if string(rcvMsg.data) != "Hello" {
 		t.Fatalf("failed string(rcvMsg.data) != Hello")
 	}
+
+	server.stop()
+	client.stop()
 }
