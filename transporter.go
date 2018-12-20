@@ -20,12 +20,13 @@ type rcvMsg struct {
 type transporter interface {
 	run(net.IP, int) error
 	stop()
+	send(*sendMsg)
+	getReceiveChannel() chan *rcvMsg
 }
 
 func newUdpTransporter() *udpTransporter {
-	sendChan := make(chan *sendMsg, 10)
 	rcvChan := make(chan *rcvMsg, 10)
-	return &udpTransporter{sendChan, rcvChan, true, nil}
+	return &udpTransporter{nil, rcvChan, true, nil}
 }
 
 type udpTransporter struct {
@@ -37,7 +38,6 @@ type udpTransporter struct {
 
 func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 	src := &net.UDPAddr{listenIp, listenPort, ""}
-
 	conn, err := net.ListenUDP("udp", src)
 	if err != nil {
 		return err
@@ -45,13 +45,14 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 
 	ut.stopFlag = false
 	ut.conn = conn
+	ut.sendChan = make(chan *sendMsg, 10)
 
 	go func() {
 		var buf [1500]byte
 
 		for {
 			// TODO: use Read or ReadMsgIP - https://golang.org/src/net/iprawsock.go?s=207:773#L2
-			// TODO: user SetTimer
+			// TODO: use SetTimer
 			c, addr, err := conn.ReadFromUDP(buf[0:])
 			if err != nil {
 				if ut.stopFlag {
@@ -86,7 +87,14 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 func (ut *udpTransporter) stop() {
 	ut.stopFlag = true
 	close(ut.sendChan)
-	close(ut.rcvChan)
 	_ = ut.conn.Close()
 	ut.conn = nil
+}
+
+func (ut *udpTransporter) send(msg *sendMsg) {
+	ut.sendChan <- msg
+}
+
+func (ut *udpTransporter) getReceiveChannel() chan *rcvMsg {
+	return ut.rcvChan
 }
