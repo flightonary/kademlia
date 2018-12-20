@@ -9,8 +9,8 @@ const (
 )
 
 const (
-	debugPrefix = "[Kademlia:DEBUG] "
-	infoPrefix  = "[Kademlia:INFO] "
+	debugPrefix = "[Kademlia:DEBUG]"
+	infoPrefix  = "[Kademlia:INFO]"
 )
 
 var kadlog = logger{logLevelInfo}
@@ -21,37 +21,29 @@ type logger struct {
 
 func (l *logger) debug(v ...interface{}) {
 	if l.loglevel <= logLevelDebug {
-		log.Print(debugPrefix, v)
-	}
-}
-
-func (l *logger) debugln(v ...interface{}) {
-	if l.loglevel <= logLevelDebug {
-		log.Print(debugPrefix, v)
+		v = append(v[0:1], v[0:]...)
+		v[0] = debugPrefix
+		log.Print(v...)
 	}
 }
 
 func (l *logger) debugf(format string, v ...interface{}) {
 	if l.loglevel <= logLevelDebug {
-		log.Print(debugPrefix+format, v)
+		log.Printf(debugPrefix+format, v...)
 	}
 }
 
 func (l *logger) info(v ...interface{}) {
 	if l.loglevel <= logLevelInfo {
-		log.Print(infoPrefix, v)
-	}
-}
-
-func (l *logger) infoln(v ...interface{}) {
-	if l.loglevel <= logLevelInfo {
-		log.Print(infoPrefix, v)
+		v = append(v[0:1], v[0:]...)
+		v[0] = infoPrefix
+		log.Print(v...)
 	}
 }
 
 func (l *logger) infof(format string, v ...interface{}) {
 	if l.loglevel <= logLevelInfo {
-		log.Print(infoPrefix+format, v)
+		log.Printf(infoPrefix+format, v...)
 	}
 }
 

@@ -55,7 +55,7 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 			c, addr, err := conn.ReadFromUDP(buf[0:])
 			if err != nil {
 				if ut.stopFlag {
-					kadlog.debugln("stopped running udpTransporter @ receiver goroutine")
+					kadlog.debug("stopped running udpTransporter @ receiver goroutine")
 					break
 				}
 				// TODO: return err via rcvChan or errChan
@@ -81,7 +81,7 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 					continue
 				}
 			} else {
-				kadlog.debugln("stopped running udpTransporter @ sender goroutine")
+				kadlog.debug("stopped running udpTransporter @ sender goroutine")
 				break
 			}
 		}
