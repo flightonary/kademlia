@@ -24,9 +24,9 @@ func GetHostIp() (net.IP, error) {
 	return nil, errors.New("can not find ip address other than loopback")
 }
 
-func GenerateRandomId() []byte {
+func GenerateRandomId() KadID {
 	rand.Seed(time.Now().UnixNano())
-	buff := make([]byte, KadIdLen/8)
-	rand.Read(buff)
-	return buff
+	kid := KadID{}
+	rand.Read(kid[:])
+	return kid
 }
