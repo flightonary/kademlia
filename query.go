@@ -17,44 +17,44 @@ const (
 )
 
 type kademliaMessage struct {
-	origin  *Node
-	querySN int64
-	typeId  int
-	body    interface{}
+	Origin  *Node
+	QuerySN int64
+	TypeId  int
+	Body    interface{}
 }
 
 type pingQuery struct {
-	target KadID
+	Target KadID
 }
 
 type findNodeQuery struct {
-	target KadID
+	Target KadID
 }
 
 type findValueQuery struct {
-	target KadID
+	Target KadID
 }
 
 type dataStoreQuery struct {
-	data KadID
+	Data KadID
 }
 
 type pingReply struct {
-	target KadID
+	Target KadID
 }
 
 type findNodeReply struct {
-	closest []*Node
+	Closest []*Node
 }
 
 type findValueReply struct {
-	closest  []*Node
-	hasValue bool
-	value    []byte
+	Closest  []*Node
+	HasValue bool
+	Value    []byte
 }
 
 type dataStoreReply struct {
-	success bool
+	Success bool
 }
 
 func init() {

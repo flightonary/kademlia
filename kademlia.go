@@ -32,7 +32,7 @@ func NewKademlia(own *Node) *Kademlia {
 }
 
 func (kad *Kademlia) Bootstrap(entryNodeAddr string, entryNodePort int) error {
-	err := kad.transporter.run(kad.own.ip, kad.own.port)
+	err := kad.transporter.run(kad.own.IP, kad.own.Port)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (kad *Kademlia) mainRoutine() {
 			switch c := (*cmd).(type) {
 			case bootstrapCmd:
 				kadlog.debug("receive cmd", c)
-				err := kad.sendFindNodeQuery(c.ip, c.port, kad.own.id)
+				err := kad.sendFindNodeQuery(c.ip, c.port, kad.own.Id)
 				if err != nil {
 					kadlog.debug(err)
 				}
@@ -75,15 +75,15 @@ func (kad *Kademlia) mainRoutine() {
 func (kad *Kademlia) baseKademliaMessage() *kademliaMessage {
 	kad.querySN++
 	return &kademliaMessage{
-		origin: kad.own,
-		querySN: kad.querySN,
+		Origin:  kad.own,
+		QuerySN: kad.querySN,
 	}
 }
 
 func (kad *Kademlia) sendFindNodeQuery(ip net.IP, port int, target KadID) error {
 	kadMsg := kad.baseKademliaMessage()
-	kadMsg.typeId = typeFindNodeQuery
-	kadMsg.body = &findNodeQuery{target}
+	kadMsg.TypeId = typeFindNodeQuery
+	kadMsg.Body = &findNodeQuery{target}
 	data, err := serializeKademliaMessage(kadMsg)
 	if err != nil {
 		return err
