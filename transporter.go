@@ -5,7 +5,6 @@ import (
 )
 
 type sendMsg struct {
-	requestId int64
 	destIp    net.IP
 	destPort  int
 	data      []byte

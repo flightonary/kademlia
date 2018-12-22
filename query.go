@@ -18,7 +18,7 @@ const (
 
 type kademliaMessage struct {
 	origin  *Node
-	queryId int64
+	querySN int64
 	typeId  int
 	body    interface{}
 }
