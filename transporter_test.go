@@ -27,7 +27,7 @@ func TestSendAndReceive(t *testing.T) {
 	}
 
 	sendData := []byte("Hello")
-	client.send(&sendMsg{0, local, serverPort, sendData})
+	client.send(&sendMsg{local, serverPort, sendData})
 
 	rcvMsg, ok := <- server.receiveChannel()
 	if !ok {

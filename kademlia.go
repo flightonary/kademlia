@@ -20,9 +20,9 @@ type Kademlia struct {
 	querySN	    int64
 }
 
-func NewKademlia(own Node) *Kademlia {
+func NewKademlia(own *Node) *Kademlia {
 	kad := &Kademlia{}
-	kad.own = &own
+	kad.own = own
 	kad.nodes = []*Node{}
 	kad.mainChan = make(chan *ctrlCmd, 10)
 	kad.endChan = make(chan *interface{})
