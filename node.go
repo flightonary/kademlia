@@ -14,6 +14,6 @@ type Node struct {
 	Port int
 }
 
-func NewNode(id KadID, ip net.IP, port int) (*Node, error) {
-	return &Node{id, ip, port}, nil
+func NewNode(id KadID, ip net.IP, port int) *Node {
+	return &Node{id, ip, port}
 }

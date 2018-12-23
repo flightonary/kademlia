@@ -12,7 +12,7 @@ func main() {
 	id := kademlia.GenerateRandomId()
 	ip, _ := kademlia.GetHostIp()
 	port := 7001
-	node, _ := kademlia.NewNode(id, ip, port)
+	node := kademlia.NewNode(id, ip, port)
 
 	kad := kademlia.NewKademlia(node)
 

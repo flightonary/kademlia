@@ -46,13 +46,14 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 	ut.conn = conn
 	ut.sendChan = make(chan *sendMsg, 10)
 
+	// receiver routine
 	go func() {
 		var buf [1500]byte
 
 		for {
 			// TODO: use Read or ReadMsgIP - https://golang.org/src/net/iprawsock.go?s=207:773#L2
 			// TODO: use SetTimer
-			c, addr, err := conn.ReadFromUDP(buf[0:])
+			n, addr, err := conn.ReadFromUDP(buf[0:])
 			if err != nil {
 				if ut.stopFlag {
 					kadlog.debug("stopped running udpTransporter @ receiver goroutine")
@@ -62,18 +63,20 @@ func (ut *udpTransporter) run(listenIp net.IP, listenPort int) error {
 				continue
 			}
 
-			data := make([]byte, c)
-			copy(data, buf[:c])
+			data := make([]byte, n)
+			copy(data, buf[:n])
 			ut.rcvChan <- &rcvMsg{addr.IP, addr.Port, data}
 		}
 
 	}()
 
+	// sender routine
 	go func() {
 		for sendMsg := range ut.sendChan {
 			dst := &net.UDPAddr{sendMsg.destIp, sendMsg.destPort, ""}
 			_, err = conn.WriteToUDP(sendMsg.data, dst)
 			if err != nil {
+				kadlog.debug(err)
 				// TODO: return err via rcvChan or errChan
 			}
 		}

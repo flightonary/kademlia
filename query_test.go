@@ -55,7 +55,7 @@ func commonCheck(t *testing.T, msg *kademliaMessage) *kademliaMessage {
 
 func commonKademliaMessage() *kademliaMessage {
 	addr, _ := net.ResolveIPAddr("ip", "0.0.0.0")
-	node, _ := NewNode(KadID{}, addr.IP, 9999)
+	node := NewNode(KadID{}, addr.IP, 9999)
 	return &kademliaMessage{
 		Origin:  node,
 		QuerySN: 0,
