@@ -17,7 +17,7 @@ type Kademlia struct {
 	mainChan    chan *ctrlCmd
 	endChan     chan *interface{}
 	transporter transporter
-	querySN	    int64
+	querySN     int64
 }
 
 func NewKademlia(own *Node) *Kademlia {
@@ -55,20 +55,20 @@ func (kad *Kademlia) Leave() {
 
 func (kad *Kademlia) mainRoutine() {
 	select {
-		case cmd := <-kad.mainChan:
-			switch c := (*cmd).(type) {
-			case bootstrapCmd:
-				kadlog.debug("receive cmd", c)
-				err := kad.sendFindNodeQuery(c.ip, c.port, kad.own.Id)
-				if err != nil {
-					kadlog.debug(err)
-				}
-			default:
-				kadlog.debug("receive cmd", c)
+	case cmd := <-kad.mainChan:
+		switch c := (*cmd).(type) {
+		case bootstrapCmd:
+			kadlog.debug("receive cmd", c)
+			err := kad.sendFindNodeQuery(c.ip, c.port, kad.own.Id)
+			if err != nil {
+				kadlog.debug(err)
 			}
-		case <- kad.endChan:
-			kadlog.debug("leave from kademlia cluster")
-			return
+		default:
+			kadlog.debug("receive cmd", c)
+		}
+	case <-kad.endChan:
+		kadlog.debug("leave from kademlia cluster")
+		return
 	}
 }
 

@@ -5,9 +5,9 @@ import (
 )
 
 type sendMsg struct {
-	destIp    net.IP
-	destPort  int
-	data      []byte
+	destIp   net.IP
+	destPort int
+	data     []byte
 }
 
 type rcvMsg struct {
