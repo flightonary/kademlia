@@ -36,7 +36,7 @@ type findValueQuery struct {
 }
 
 type dataStoreQuery struct {
-	Data KadID
+	Data []byte
 }
 
 type pingReply struct {
