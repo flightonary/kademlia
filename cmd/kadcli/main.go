@@ -9,7 +9,7 @@ import (
 func main() {
 	kademlia.SetLogLevelDebug()
 
-	id := kademlia.GenerateRandomId()
+	id := kademlia.GenerateRandomKadId()
 	ip, _ := kademlia.GetHostIp()
 	port := 7001
 	node := kademlia.NewNode(id, ip, port)

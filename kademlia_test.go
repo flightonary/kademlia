@@ -10,8 +10,8 @@ func TestBootstrap(t *testing.T) {
 	SetLogLevelDebug()
 
 	addr, _ := net.ResolveIPAddr("ip", "127.0.0.1")
-	kadNode1 := NewNode(GenerateRandomId(), addr.IP, 7005)
-	kadNode2 := NewNode(GenerateRandomId(), addr.IP, 7006)
+	kadNode1 := NewNode(GenerateRandomKadId(), addr.IP, 7005)
+	kadNode2 := NewNode(GenerateRandomKadId(), addr.IP, 7006)
 	kad1 := NewKademlia(kadNode1)
 	kad2 := NewKademlia(kadNode2)
 
