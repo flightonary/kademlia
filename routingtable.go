@@ -4,27 +4,49 @@ import "container/list"
 
 const BucketSize = 20
 
-type routingInterface interface {
-	add(node *Node) (bool, *Node)
-	del(kid *KadID)
-	closest(kid *KadID) []*Node
-}
-
 type routingTable struct {
 	ownId KadID
 	table [KadIdLen]list.List
 }
 
-func (*routingTable) add(node *Node) (bool, *Node) {
-	panic("implement me")
+func (rt *routingTable) add(node *Node) (bool, *Node) {
+	if rt.find(&node.Id) == nil {
+		index := rt.index(rt.xor(&rt.ownId, &node.Id))
+		rt.table[index].PushBack(node)
+		// TODO: check if list len is longer than 20
+	}
+	return true, nil
 }
 
-func (*routingTable) del(kid *KadID) {
-	panic("implement me")
+func (rt *routingTable) del(kid *KadID) {
+	index := rt.index(rt.xor(&rt.ownId, kid))
+	for e := rt.table[index].Front(); e != nil; e = e.Next() {
+		if e.Value.(*Node).Id == *kid {
+			rt.table[index].Remove(e)
+			return
+		}
+	}
 }
 
-func (*routingTable) closest(kid *KadID) []*Node {
-	panic("implement me")
+func (rt *routingTable) find(kid *KadID) *Node {
+	index := rt.index(rt.xor(&rt.ownId, kid))
+	for e := rt.table[index].Front(); e != nil; e = e.Next() {
+		if e.Value.(*Node).Id == *kid {
+			return e.Value.(*Node)
+		}
+	}
+	return nil
+}
+
+func (rt *routingTable) closest(kid *KadID) []*Node {
+	// TODO: make array of 20 closest nodes
+	nodes := make([]*Node, 0)
+	for i := 0; i < KadIdLen; i++ {
+		for e := rt.table[i].Front(); e != nil; e = e.Next() {
+			nodes = append(nodes, e.Value.(*Node))
+		}
+	}
+	return nodes
 }
 
 func (rt *routingTable) index(kid *KadID) int {

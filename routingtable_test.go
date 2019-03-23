@@ -1,6 +1,11 @@
 package kademlia
 
-import "testing"
+import (
+	"container/list"
+	"fmt"
+	"reflect"
+	"testing"
+)
 
 func TestXor(t *testing.T) {
 	rt := routingTable{}
@@ -53,4 +58,71 @@ func fill(id *KadID, b byte) *KadID {
 		id[i] = b
 	}
 	return id
+}
+
+func Test_routingTable_add(t *testing.T) {
+	ownId := fill(&KadID{}, 0x00)
+	ownId[0] = 0x01
+	node := Node{}
+	node.Id = *fill(&KadID{}, 0x00)
+	node.Id[19] = 0x01
+
+	type fields struct {
+		ownId KadID
+		table [KadIdLen]list.List
+	}
+	type args struct {
+		node *Node
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+		want1  *Node
+		finally func(*routingTable) (bool, string)
+	}{
+		{
+			name: "simple add node",
+			fields: fields{
+				ownId: *ownId,
+				table: [KadIdLen]list.List{},
+			},
+			args: args{node: &node},
+			want: true,
+			want1: nil,
+			finally: func(rt *routingTable) (bool, string) {
+				index := rt.index(rt.xor(ownId, &node.Id))
+				e := rt.table[index].Front()
+				if e == nil {
+					return false, "Node is not added in the list."
+				}
+				if e.Value.(*Node) != &node {
+					return false, fmt.Sprintf("Added node kid = %v, want %v", e.Value.(*Node).Id, node.Id)
+				}
+				return true, ""
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rt := &routingTable{
+				ownId: tt.fields.ownId,
+				table: tt.fields.table,
+			}
+			got, got1 := rt.add(tt.args.node)
+			if got != tt.want {
+				t.Errorf("routingTable.add() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("routingTable.add() got1 = %v, want %v", got1, tt.want1)
+			}
+			if tt.finally != nil {
+				success, errMsg := tt.finally(rt)
+				if !success {
+					t.Error(errMsg)
+				}
+			}
+		})
+	}
 }
