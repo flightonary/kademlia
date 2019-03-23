@@ -24,6 +24,7 @@ type transporter interface {
 }
 
 func newUdpTransporter() *udpTransporter {
+	// TODO: take rcvChan from args
 	rcvChan := make(chan *rcvMsg, 10)
 	return &udpTransporter{nil, rcvChan, true, nil}
 }

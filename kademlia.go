@@ -131,12 +131,11 @@ func (kad *Kademlia) sendFindNodeReply(ip net.IP, port int, sn int64, closest []
 	return nil
 }
 
+// TODO: move the function to Routing Table
 func (kad *Kademlia) findClosestNodes(target KadID) []*Node {
-	// TODO: find nodes near query.Target
 	return []*Node{}
 }
 
-// TODO: move the function to Routing Table
 func (kad *Kademlia) newSN() int64 {
 	kad.querySN++
 	return kad.querySN
