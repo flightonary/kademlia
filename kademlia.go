@@ -32,6 +32,7 @@ func NewKademlia(own *Node) *Kademlia {
 }
 
 func (kad *Kademlia) Bootstrap(entryNodeAddr string, entryNodePort int) error {
+	// TODO: take net.IP from args directly
 	addr, err := net.ResolveIPAddr("ip", entryNodeAddr)
 	if err != nil {
 		return err
