@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/flightonary/kademlia"
 )
@@ -45,14 +46,15 @@ func main() {
 	fmt.Print("> ")
 	for stdin.Scan(){
 		input := stdin.Text()
-		switch input {
+		inputs := strings.Split(input, " ")
+		switch inputs[0] {
 		case "help":
 			fmt.Println(`command list:
-  help:              show help
-  show:              show routing table
-  store <key:value>: store <key:value>
-  find <key>:        find value of <key>
-  quit:              terminate program
+  help               - show help
+  show               - show routing table
+  store <key:value>  - store <key:value>
+  find <key>         - find value of <key>
+  quit               - terminate program
 `)
 		case "show":
 			rt := kad.GetRoutingTable()
@@ -65,6 +67,12 @@ func main() {
 					fmt.Println("")
 				}
 			}
+		case "store":
+			kv := strings.Split(inputs[1], ":")
+			kad.Store(kv[0], kv[1])
+		case "find":
+			value := kad.FindValue(inputs[1])
+			fmt.Println(value)
 		case "quit":
 			os.Exit(0)
 		case "":

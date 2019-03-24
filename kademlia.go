@@ -18,6 +18,7 @@ type Kademlia struct {
 	endChan     chan interface{}
 	transporter transporter
 	rt          *routingTable
+	store       map[string]string
 	querySN     int64 // TODO: change to transaction Id
 }
 
@@ -28,6 +29,7 @@ func NewKademlia(own *Node) *Kademlia {
 	kad.endChan = make(chan interface{})
 	kad.transporter = newUdpTransporter()
 	kad.rt = newRoutingTable(&own.Id)
+	kad.store = map[string]string{}
 	kad.querySN = 0
 	return kad
 }
@@ -48,6 +50,8 @@ func (kad *Kademlia) Bootstrap(entryNodeAddr string, entryNodePort int) error {
 
 	go kad.mainRoutine()
 
+	kadlog.debugf("run bootstrap, own kid: %x", kad.own.Id[0:4])
+
 	return nil
 }
 
@@ -56,6 +60,17 @@ func (kad *Kademlia) Leave() {
 	kad.transporter.stop()
 }
 
+func (kad *Kademlia) Store(key string, value string) {
+	kad.store[key] = value
+	// TODO: send StoreQuery to closest nodes
+}
+
+func (kad *Kademlia) FindValue(key string) string {
+	// TODO: query FindValue to closest nodes when the value is unknown.
+	return kad.store[key]
+}
+
+// For debug purpose
 func (kad *Kademlia) GetRoutingTable() [KadIdLen]list.List {
 	return kad.rt.table
 }
