@@ -5,13 +5,17 @@ import "container/list"
 const BucketSize = 20
 
 type routingTable struct {
-	ownId KadID
+	ownId *KadID
 	table [KadIdLen]list.List
 }
 
+func newRoutingTable(ownId *KadID) *routingTable {
+	return &routingTable{ownId: ownId}
+}
+
 func (rt *routingTable) add(node *Node) (bool, *Node) {
-	if rt.find(&node.Id) == nil {
-		index := rt.index(rt.xor(&rt.ownId, &node.Id))
+	if &node.Id != rt.ownId && rt.find(&node.Id) == nil {
+		index := rt.index(rt.xor(rt.ownId, &node.Id))
 		rt.table[index].PushBack(node)
 		// TODO: check if list len is longer than 20
 	}
@@ -19,7 +23,7 @@ func (rt *routingTable) add(node *Node) (bool, *Node) {
 }
 
 func (rt *routingTable) del(kid *KadID) {
-	index := rt.index(rt.xor(&rt.ownId, kid))
+	index := rt.index(rt.xor(rt.ownId, kid))
 	for e := rt.table[index].Front(); e != nil; e = e.Next() {
 		if e.Value.(*Node).Id == *kid {
 			rt.table[index].Remove(e)
@@ -29,7 +33,7 @@ func (rt *routingTable) del(kid *KadID) {
 }
 
 func (rt *routingTable) find(kid *KadID) *Node {
-	index := rt.index(rt.xor(&rt.ownId, kid))
+	index := rt.index(rt.xor(rt.ownId, kid))
 	for e := rt.table[index].Front(); e != nil; e = e.Next() {
 		if e.Value.(*Node).Id == *kid {
 			return e.Value.(*Node)
@@ -50,7 +54,7 @@ func (rt *routingTable) closest(kid *KadID) []*Node {
 }
 
 func (rt *routingTable) index(kid *KadID) int {
-	distance := rt.xor(&rt.ownId, kid)
+	distance := rt.xor(rt.ownId, kid)
 	firstBitIndex := 0
 	for _, v := range distance {
 		if v == 0 {

@@ -26,7 +26,7 @@ func TestXor(t *testing.T) {
 func TestIndex(t *testing.T) {
 	ownId := fill(&KadID{}, 0x00)
 	rt := routingTable{}
-	rt.ownId = *ownId
+	rt.ownId = ownId
 
 	// in case that first bit is 1.
 	k1 := fill(&KadID{}, 0x00)
@@ -68,7 +68,7 @@ func Test_routingTable_add(t *testing.T) {
 	node.Id[19] = 0x01
 
 	type fields struct {
-		ownId KadID
+		ownId *KadID
 		table [KadIdLen]list.List
 	}
 	type args struct {
@@ -85,7 +85,7 @@ func Test_routingTable_add(t *testing.T) {
 		{
 			name: "simple add node",
 			fields: fields{
-				ownId: *ownId,
+				ownId: ownId,
 				table: [KadIdLen]list.List{},
 			},
 			args: args{node: &node},

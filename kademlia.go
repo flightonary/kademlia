@@ -13,20 +13,20 @@ type bootstrapCmd struct {
 
 type Kademlia struct {
 	own         *Node
-	nodes       []*Node
 	mainChan    chan ctrlCmd
 	endChan     chan interface{}
 	transporter transporter
+	rt          *routingTable
 	querySN     int64 // TODO: change to transaction Id
 }
 
 func NewKademlia(own *Node) *Kademlia {
 	kad := &Kademlia{}
 	kad.own = own
-	kad.nodes = []*Node{}
 	kad.mainChan = make(chan ctrlCmd, 10)
 	kad.endChan = make(chan interface{})
 	kad.transporter = newUdpTransporter()
+	kad.rt = newRoutingTable(&own.Id)
 	kad.querySN = 0
 	return kad
 }
@@ -79,14 +79,31 @@ func (kad *Kademlia) mainRoutine() {
 				switch query := kadMsg.Body.(type) {
 				case *findNodeQuery:
 					kadlog.debug("receive findNodeQuery")
-					closest := kad.findClosestNodes(query.Target)
+					// reply with closest nodes
+					closest := kad.rt.closest(&query.Target)
 					err := kad.sendFindNodeReply(rcvMsg.srcIp, rcvMsg.srcPort, kadMsg.QuerySN, closest)
 					if err != nil {
 						kadlog.debug(err)
 					}
+					// add source node to routing table
+					kad.rt.add(kadMsg.Origin)
 				case *findNodeReply:
 					kadlog.debug("receive findNodeReply")
-					// TODO: update nodes(routing table)
+					// add source node to routing table
+					kad.rt.add(kadMsg.Origin)
+					// add new node to routing table and send FindNodeQuery if it is unknown
+					var node *Node
+					for node = range query.Closest {
+						if kad.rt.find(&node.Id) == nil {
+							err := kad.sendFindNodeQuery(node.IP, node.Port, kad.own.Id)
+							if err != nil {
+								kadlog.debug(err)
+							}
+						} else {
+							// TODO: move node to last of list
+						}
+						kad.rt.add(node)
+					}
 				default:
 					kadlog.debug("receive unknown kademlia message")
 				}
@@ -130,11 +147,6 @@ func (kad *Kademlia) sendFindNodeReply(ip net.IP, port int, sn int64, closest []
 	msg := &sendMsg{ip, port, data}
 	kad.transporter.send(msg)
 	return nil
-}
-
-// TODO: move the function to Routing Table
-func (kad *Kademlia) findClosestNodes(target KadID) []*Node {
-	return []*Node{}
 }
 
 func (kad *Kademlia) newSN() int64 {
