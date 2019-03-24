@@ -13,7 +13,8 @@ func TestXor(t *testing.T) {
 	k1 := fill(&KadID{}, 0x00)
 	k2 := fill(&KadID{}, 0xFF)
 	k2[0] = 0xFE
-	xor := rt.xor(k1, k2)
+	rt.ownId = k1
+	xor := rt.xor(k2)
 
 	ans := fill(&KadID{}, 0xFF)
 	ans[0] = 0xFE
@@ -92,7 +93,7 @@ func Test_routingTable_add(t *testing.T) {
 			want: true,
 			want1: nil,
 			finally: func(rt *routingTable) (bool, string) {
-				index := rt.index(rt.xor(ownId, &node.Id))
+				index := rt.index(&node.Id)
 				e := rt.table[index].Front()
 				if e == nil {
 					return false, "Node is not added in the list."

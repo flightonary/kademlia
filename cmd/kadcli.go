@@ -49,11 +49,22 @@ func main() {
 		case "help":
 			fmt.Println(`command list:
   help:              show help
-  show rt:           show routing table
+  show:              show routing table
   store <key:value>: store <key:value>
   find <key>:        find value of <key>
   quit:              terminate program
 `)
+		case "show":
+			rt := kad.GetRoutingTable()
+			for i := 0; i < kademlia.KadIdLen; i++ {
+				if rt[i].Len() > 0 {
+					fmt.Printf("distance 2^%02d:", kademlia.KadIdLen - i)
+					for e := rt[i].Front(); e != nil; e = e.Next() {
+						fmt.Printf(" %x", e.Value.(*kademlia.Node).Id[0:4])
+					}
+					fmt.Println("")
+				}
+			}
 		case "quit":
 			os.Exit(0)
 		case "":

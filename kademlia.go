@@ -1,6 +1,7 @@
 package kademlia
 
 import (
+	"container/list"
 	"net"
 )
 
@@ -55,6 +56,10 @@ func (kad *Kademlia) Leave() {
 	kad.transporter.stop()
 }
 
+func (kad *Kademlia) GetRoutingTable() [KadIdLen]list.List {
+	return kad.rt.table
+}
+
 func (kad *Kademlia) mainRoutine() {
 	for {
 		select {
@@ -78,7 +83,8 @@ func (kad *Kademlia) mainRoutine() {
 			} else {
 				switch query := kadMsg.Body.(type) {
 				case *findNodeQuery:
-					kadlog.debugf("receive FindNodeQuery from Node(0x%x)", kadMsg.Origin.Id[0])
+					// TODO: check if the message is for me
+					kadlog.debugf("receive FindNodeQuery from Node(0x%x)", kadMsg.Origin.Id[0:4])
 					// reply with closest nodes
 					closest := kad.rt.closest(&query.Target)
 					err := kad.sendFindNodeReply(rcvMsg.srcIp, rcvMsg.srcPort, kadMsg.QuerySN, closest)
@@ -88,7 +94,7 @@ func (kad *Kademlia) mainRoutine() {
 					// add source node to routing table
 					kad.rt.add(kadMsg.Origin)
 				case *findNodeReply:
-					kadlog.debugf("receive FindNodeReply from Node(0x%x)", kadMsg.Origin.Id[0])
+					kadlog.debugf("receive FindNodeReply from Node(0x%x)", kadMsg.Origin.Id[0:4])
 					// add source node to routing table
 					kad.rt.add(kadMsg.Origin)
 					// add new node to routing table and send FindNodeQuery if it is unknown
@@ -131,7 +137,7 @@ func (kad *Kademlia) sendFindNodeQuery(ip net.IP, port int, target KadID) error 
 	}
 	msg := &sendMsg{ip, port, data}
 	kad.transporter.send(msg)
-	kadlog.debugf("send FindNodeQuery to Node(0x%x)", target[0])
+	kadlog.debugf("send FindNodeQuery to Node(0x%x)", target[0:4])
 	return nil
 }
 
