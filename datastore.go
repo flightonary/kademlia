@@ -1,5 +1,7 @@
 package kademlia
 
+import "unsafe"
+
 type dataStore struct {
 	store map[string][]byte
 }
@@ -13,7 +15,8 @@ func (ds *dataStore) Get(kid *KadID) []byte {
 }
 
 func (ds *dataStore) GetAsString(kid *KadID) string {
-	return string(ds.Get(kid))
+	data := ds.Get(kid)
+	return *(*string)(unsafe.Pointer(&data))
 }
 
 func (ds *dataStore) Put(kid *KadID, value []byte) {
