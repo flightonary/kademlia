@@ -43,7 +43,7 @@ func (rt *routingTable) find(kid *KadID) *Node {
 }
 
 func (rt *routingTable) closest(kid *KadID) []*Node {
-	// TODO: make array of 20 closest nodes
+	// TODO: make sorted array of 20 closest nodes
 	nodes := make([]*Node, 0)
 	for i := 0; i < KadIdLen; i++ {
 		for e := rt.table[i].Front(); e != nil; e = e.Next() {

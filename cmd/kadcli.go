@@ -42,6 +42,10 @@ func main() {
 		fmt.Println(err)
 	}
 
+	kad.SetFindValueCallback(func(key string, value []byte){
+		fmt.Printf("key: %s, value: %s\n", key, string(value))
+	})
+
 	stdin := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
 	for stdin.Scan(){
@@ -69,10 +73,9 @@ func main() {
 			}
 		case "store":
 			kv := strings.Split(inputs[1], ":")
-			kad.Store(kv[0], kv[1])
+			kad.Store(kv[0], []byte(kv[1]))
 		case "find":
-			value := kad.FindValue(inputs[1])
-			fmt.Println(value)
+			kad.FindValue(inputs[1])
 		case "quit":
 			os.Exit(0)
 		case "":

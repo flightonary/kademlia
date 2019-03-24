@@ -33,11 +33,11 @@ type findNodeQuery struct {
 }
 
 type findValueQuery struct {
-	Target KadID
+	Key string
 }
 
 type storeQuery struct {
-	Key  KadID
+	Key  string
 	Data []byte
 }
 
@@ -50,9 +50,10 @@ type findNodeReply struct {
 }
 
 type findValueReply struct {
-	Closest  []*Node
+	Key      string
 	HasValue bool
 	Value    []byte
+	Closest  []*Node
 }
 
 type storeReply struct {
