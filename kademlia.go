@@ -78,7 +78,7 @@ func (kad *Kademlia) mainRoutine() {
 			} else {
 				switch query := kadMsg.Body.(type) {
 				case *findNodeQuery:
-					kadlog.debug("receive findNodeQuery")
+					kadlog.debugf("receive FindNodeQuery from Node(0x%x)", kadMsg.Origin.Id[0])
 					// reply with closest nodes
 					closest := kad.rt.closest(&query.Target)
 					err := kad.sendFindNodeReply(rcvMsg.srcIp, rcvMsg.srcPort, kadMsg.QuerySN, closest)
@@ -88,12 +88,11 @@ func (kad *Kademlia) mainRoutine() {
 					// add source node to routing table
 					kad.rt.add(kadMsg.Origin)
 				case *findNodeReply:
-					kadlog.debug("receive findNodeReply")
+					kadlog.debugf("receive FindNodeReply from Node(0x%x)", kadMsg.Origin.Id[0])
 					// add source node to routing table
 					kad.rt.add(kadMsg.Origin)
 					// add new node to routing table and send FindNodeQuery if it is unknown
-					var node *Node
-					for node = range query.Closest {
+					for _, node := range query.Closest {
 						if kad.rt.find(&node.Id) == nil {
 							err := kad.sendFindNodeQuery(node.IP, node.Port, kad.own.Id)
 							if err != nil {
@@ -132,6 +131,7 @@ func (kad *Kademlia) sendFindNodeQuery(ip net.IP, port int, target KadID) error 
 	}
 	msg := &sendMsg{ip, port, data}
 	kad.transporter.send(msg)
+	kadlog.debugf("send FindNodeQuery to Node(0x%x)", target[0])
 	return nil
 }
 
@@ -146,6 +146,7 @@ func (kad *Kademlia) sendFindNodeReply(ip net.IP, port int, sn int64, closest []
 	}
 	msg := &sendMsg{ip, port, data}
 	kad.transporter.send(msg)
+	kadlog.debug("send FindNodeReply")
 	return nil
 }
 

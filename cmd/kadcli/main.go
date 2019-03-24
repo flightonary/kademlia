@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -40,5 +41,25 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println("done")
+	stdin := bufio.NewScanner(os.Stdin)
+	fmt.Print("> ")
+	for stdin.Scan(){
+		input := stdin.Text()
+		switch input {
+		case "help":
+			fmt.Println(`command list:
+  help:              show help
+  show rt:           show routing table
+  store <key:value>: store <key:value>
+  find <key>:        find value of <key>
+  quit:              terminate program
+`)
+		case "quit":
+			os.Exit(0)
+		case "":
+		default:
+			fmt.Println("unknown command")
+		}
+		fmt.Print("> ")
+	}
 }
