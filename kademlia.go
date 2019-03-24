@@ -1,6 +1,7 @@
 package kademlia
 
 import (
+	"bytes"
 	"container/list"
 	"net"
 )
@@ -114,8 +115,8 @@ func (kad *Kademlia) mainRoutine() {
 					kad.rt.add(kadMsg.Origin)
 					// add new node to routing table and send FindNodeQuery if it is unknown
 					for _, node := range query.Closest {
-						if kad.rt.find(&node.Id) == nil {
-							err := kad.sendFindNodeQuery(node.IP, node.Port, kad.own.Id)
+						if kad.isNotSameHost(node) && kad.rt.find(&node.Id) == nil {
+							err := kad.sendFindNodeQuery(node.IP, node.Port, node.Id)
 							if err != nil {
 								kadlog.debug(err)
 							}
@@ -133,6 +134,10 @@ func (kad *Kademlia) mainRoutine() {
 			return
 		}
 	}
+}
+
+func (kad *Kademlia) isNotSameHost(node *Node) bool {
+	return bytes.Compare(kad.own.IP, node.IP) != 0 && kad.own.Port != node.Port
 }
 
 func (kad *Kademlia) baseKademliaMessage() *kademliaMessage {
