@@ -17,3 +17,7 @@ type Node struct {
 func NewNode(id KadID, ip net.IP, port int) *Node {
 	return &Node{id, ip, port}
 }
+
+func String(kid *KadID) string {
+	return string(kid[:])
+}

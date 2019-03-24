@@ -3,6 +3,7 @@ package kademlia
 import (
 	"bytes"
 	"container/list"
+	"crypto/sha1"
 	"net"
 )
 
@@ -19,7 +20,7 @@ type Kademlia struct {
 	endChan     chan interface{}
 	transporter transporter
 	rt          *routingTable
-	store       map[string]string
+	store       *dataStore
 	querySN     int64 // TODO: change to transaction Id
 }
 
@@ -30,7 +31,7 @@ func NewKademlia(own *Node) *Kademlia {
 	kad.endChan = make(chan interface{})
 	kad.transporter = newUdpTransporter()
 	kad.rt = newRoutingTable(&own.Id)
-	kad.store = map[string]string{}
+	kad.store = newDataStore()
 	kad.querySN = 0
 	return kad
 }
@@ -51,7 +52,7 @@ func (kad *Kademlia) Bootstrap(entryNodeAddr string, entryNodePort int) error {
 
 	go kad.mainRoutine()
 
-	kadlog.debugf("run bootstrap, own kid: %x", kad.own.Id[0:4])
+	kadlog.debugf("run bootstrap, own kid: %x", kad.own.Id)
 
 	return nil
 }
@@ -62,13 +63,22 @@ func (kad *Kademlia) Leave() {
 }
 
 func (kad *Kademlia) Store(key string, value string) {
-	kad.store[key] = value
-	// TODO: send StoreQuery to closest nodes
+	keyKid := kad.toKadID(key)
+	kad.store.Put(keyKid, []byte(value))
+
+	// store data in each closest node
+	closest := kad.rt.closest(keyKid)
+	for _, node := range closest {
+		err := kad.sendStoreQuery(node, keyKid)
+		if err != nil {
+			kadlog.debug(err)
+		}
+	}
 }
 
 func (kad *Kademlia) FindValue(key string) string {
 	// TODO: query FindValue to closest nodes when the value is unknown.
-	return kad.store[key]
+	return 	kad.store.GetAsString(kad.toKadID(key))
 }
 
 // For debug purpose
@@ -100,7 +110,7 @@ func (kad *Kademlia) mainRoutine() {
 				switch query := kadMsg.Body.(type) {
 				case *findNodeQuery:
 					// TODO: check if the message is for me
-					kadlog.debugf("receive FindNodeQuery from Node(0x%x)", kadMsg.Origin.Id[0:4])
+					kadlog.debugf("receive FindNodeQuery from Node(%x)", kadMsg.Origin.Id)
 					// reply with closest nodes
 					closest := kad.rt.closest(&query.Target)
 					err := kad.sendFindNodeReply(rcvMsg.srcIp, rcvMsg.srcPort, kadMsg.QuerySN, closest)
@@ -110,7 +120,7 @@ func (kad *Kademlia) mainRoutine() {
 					// add source node to routing table
 					kad.rt.add(kadMsg.Origin)
 				case *findNodeReply:
-					kadlog.debugf("receive FindNodeReply from Node(0x%x)", kadMsg.Origin.Id[0:4])
+					kadlog.debugf("receive FindNodeReply from Node(%x)", kadMsg.Origin.Id)
 					// add source node to routing table
 					kad.rt.add(kadMsg.Origin)
 					// add new node to routing table and send FindNodeQuery if it is unknown
@@ -125,6 +135,12 @@ func (kad *Kademlia) mainRoutine() {
 						}
 						kad.rt.add(node)
 					}
+				case *storeQuery:
+					kadlog.debugf("receive StoreQuery from Node(%x)", kadMsg.Origin.Id)
+					// TODO: add node to routing table if it's unknown
+					// TODO: move node to last of list if it's known
+					kad.store.Put(&query.Key, query.Data)
+					// TODO: send StoreReply
 				default:
 					kadlog.debug("receive unknown kademlia message")
 				}
@@ -157,7 +173,7 @@ func (kad *Kademlia) sendFindNodeQuery(ip net.IP, port int, target KadID) error 
 	}
 	msg := &sendMsg{ip, port, data}
 	kad.transporter.send(msg)
-	kadlog.debugf("send FindNodeQuery to Node(0x%x)", target[0:4])
+	kadlog.debugf("send FindNodeQuery to Node(%x)", target)
 	return nil
 }
 
@@ -174,6 +190,28 @@ func (kad *Kademlia) sendFindNodeReply(ip net.IP, port int, sn int64, closest []
 	kad.transporter.send(msg)
 	kadlog.debug("send FindNodeReply")
 	return nil
+}
+
+func (kad *Kademlia) sendStoreQuery(node *Node, key *KadID) error {
+	kadMsg := kad.baseKademliaMessage()
+	kadMsg.TypeId = typeStoreQuery
+	kadMsg.QuerySN = kad.newSN()
+	kadMsg.Body = &storeQuery{*key, kad.store.Get(key)}
+	data, err := serializeKademliaMessage(kadMsg)
+	if err != nil {
+		return err
+	}
+	msg := &sendMsg{node.IP, node.Port, data}
+	kad.transporter.send(msg)
+	kadlog.debug("send StoreQuery")
+	return nil
+}
+
+func (kad *Kademlia) toKadID(key string) *KadID {
+	bs := sha1.Sum([]byte(key))
+	kid := KadID{}
+	copy(kid[:], bs[:])
+	return &kid
 }
 
 func (kad *Kademlia) newSN() int64 {

@@ -62,7 +62,7 @@ func main() {
 				if rt[i].Len() > 0 {
 					fmt.Printf("distance 2^%02d:", kademlia.KadIdLen - i)
 					for e := rt[i].Front(); e != nil; e = e.Next() {
-						fmt.Printf(" %x", e.Value.(*kademlia.Node).Id[0:4])
+						fmt.Printf(" %x", e.Value.(*kademlia.Node).Id)
 					}
 					fmt.Println("")
 				}

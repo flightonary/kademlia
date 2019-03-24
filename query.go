@@ -23,6 +23,7 @@ type kademliaMessage struct {
 	Body    interface{}
 }
 
+// TODO: KadID -> *KadID
 type pingQuery struct {
 	Target KadID
 }
@@ -35,7 +36,8 @@ type findValueQuery struct {
 	Target KadID
 }
 
-type dataStoreQuery struct {
+type storeQuery struct {
+	Key  KadID
 	Data []byte
 }
 
@@ -53,7 +55,7 @@ type findValueReply struct {
 	Value    []byte
 }
 
-type dataStoreReply struct {
+type storeReply struct {
 	Success bool
 }
 
@@ -61,11 +63,11 @@ func init() {
 	gob.Register(&pingQuery{})
 	gob.Register(&findNodeQuery{})
 	gob.Register(&findValueQuery{})
-	gob.Register(&dataStoreQuery{})
+	gob.Register(&storeQuery{})
 	gob.Register(&pingReply{})
 	gob.Register(&findNodeReply{})
 	gob.Register(&findValueReply{})
-	gob.Register(&dataStoreReply{})
+	gob.Register(&storeReply{})
 }
 
 func serializeKademliaMessage(msg *kademliaMessage) ([]byte, error) {
