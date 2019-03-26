@@ -66,9 +66,9 @@ func (kad *Kademlia) Leave() {
 func (kad *Kademlia) Store(key string, value []byte) {
 	kad.store.Put(key, []byte(value))
 
-	// store data in each closest node
+	// store data in each closer node
 	keyKid := kad.toKadID(key)
-	closest := kad.rt.closest(keyKid)
+	closest := kad.rt.closer(keyKid)
 	for _, node := range closest {
 		err := kad.sendStoreQuery(node, key)
 		if err != nil {
@@ -83,9 +83,9 @@ func (kad *Kademlia) FindValue(key string) {
 			kad.findValueCallback(key, kad.store.Get(key))
 		}
 	} else {
-		closest := kad.rt.closest(kad.toKadID(key))
+		closest := kad.rt.closer(kad.toKadID(key))
 		if len(closest) > 0 {
-			// inquiry to the closest node
+			// inquiry to the closer node
 			err := kad.sendFindValueQuery(closest[0], key)
 			if err != nil {
 				kadlog.debug(err)
@@ -128,8 +128,8 @@ func (kad *Kademlia) mainRoutine() {
 				case *findNodeQuery:
 					// TODO: check if the message is for me
 					kadlog.debugf("receive FindNodeQuery from Node(%x)", kadMsg.Origin.Id[0:4])
-					// reply with closest nodes
-					closest := kad.rt.closest(&query.Target)
+					// reply with closer nodes
+					closest := kad.rt.closer(&query.Target)
 					err := kad.sendFindNodeReply(rcvMsg.srcIp, rcvMsg.srcPort, kadMsg.QuerySN, closest)
 					if err != nil {
 						kadlog.debug(err)
@@ -162,7 +162,7 @@ func (kad *Kademlia) mainRoutine() {
 					hasValue := kad.store.Exist(query.Key)
 					data := kad.store.Get(query.Key)
 					var closest []*Node
-					if hasValue {closest = kad.rt.closest(kad.toKadID(query.Key))}
+					if hasValue {closest = kad.rt.closer(kad.toKadID(query.Key))}
 					err := kad.sendFindValueReply(rcvMsg.srcIp, rcvMsg.srcPort, kadMsg.QuerySN, query.Key, hasValue, data, closest)
 					if err != nil {
 						kadlog.debug(err)

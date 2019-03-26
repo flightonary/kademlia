@@ -13,13 +13,13 @@ func newRoutingTable(ownId *KadID) *routingTable {
 	return &routingTable{ownId: ownId}
 }
 
-func (rt *routingTable) add(node *Node) (bool, *Node) {
-	if &node.Id != rt.ownId && rt.find(&node.Id) == nil {
-		index := rt.index(&node.Id)
+func (rt *routingTable) add(node *Node) bool {
+	index := rt.index(&node.Id)
+	if &node.Id != rt.ownId && rt.find(&node.Id) == nil && rt.table[index].Len() <= BucketSize {
 		rt.table[index].PushBack(node)
-		// TODO: check if list len is longer than 20
+		return true
 	}
-	return true, nil
+	return false
 }
 
 func (rt *routingTable) del(kid *KadID) {
@@ -42,8 +42,8 @@ func (rt *routingTable) find(kid *KadID) *Node {
 	return nil
 }
 
-func (rt *routingTable) closest(kid *KadID) []*Node {
-	// TODO: make sorted array of 20 closest nodes
+func (rt *routingTable) closer(kid *KadID) []*Node {
+	// TODO: make sorted array of 20 closer nodes
 	nodes := make([]*Node, 0)
 	for i := 0; i < KadIdLen; i++ {
 		for e := rt.table[i].Front(); e != nil; e = e.Next() {
