@@ -135,6 +135,7 @@ func (kad *Kademlia) mainRoutine() {
 						kadlog.debug(err)
 					}
 					// add source node to routing table
+					// TODO: move node to last of list when Origin is known
 					kad.rt.add(kadMsg.Origin)
 				case *findNodeReply:
 					kadlog.debugf("receive FindNodeReply from Node(%x)", kadMsg.Origin.Id[0:4])
@@ -216,7 +217,7 @@ func (kad *Kademlia) SendFindNodeQuery(ip net.IP, port int, target KadID) error 
 	kadMsg.QuerySN = kad.newSN()
 	kadMsg.TypeId = typeFindNodeQuery
 	kadMsg.Body = &findNodeQuery{target}
-	kadlog.debugf("send FindNodeQuery to Node(%x)", target[0:4])
+	kadlog.debugf("send FindNodeQuery to Target(%x)", target[0:4])
 	return kad.sendKadMsg(ip, port, kadMsg)
 }
 

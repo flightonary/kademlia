@@ -1,6 +1,9 @@
 package kademlia
 
-import "container/list"
+import (
+	"container/list"
+	"sort"
+)
 
 const BucketSize = 20
 
@@ -43,11 +46,38 @@ func (rt *routingTable) find(kid *KadID) *Node {
 }
 
 func (rt *routingTable) closer(kid *KadID) []*Node {
-	// TODO: make sorted array of 20 closer nodes
-	nodes := make([]*Node, 0)
-	for i := 0; i < KadIdLen; i++ {
-		for e := rt.table[i].Front(); e != nil; e = e.Next() {
+	list2slice := func(li list.List) []*Node {
+		nodes := make([]*Node, 0)
+		for e := li.Front(); e != nil; e = e.Next() {
 			nodes = append(nodes, e.Value.(*Node))
+		}
+		return nodes
+	}
+
+	closestIndex := rt.index(kid)
+	nodes := list2slice(rt.table[closestIndex])
+	for i := 0; i < KadIdLen; i++ {
+		upper := closestIndex + 1
+		lower := closestIndex - 1
+		tmp := make([]*Node, 0)
+		if upper < KadIdLen {
+			tmp = append(tmp, list2slice(rt.table[upper])...)
+		}
+		if lower >= 0 {
+			tmp = append(tmp, list2slice(rt.table[lower])...)
+		}
+		sort.Slice(tmp, func(i, j int) bool {
+			for ii := 0; ii < KadIdLenByte; ii++ {
+				if tmp[i].Id[ii] == tmp[j].Id[ii] {
+					continue
+				}
+				return tmp[i].Id[ii] < tmp[j].Id[ii]
+			}
+			return true
+		})
+		nodes = append(nodes, tmp...)
+		if len(nodes) >= BucketSize {
+			return nodes[:BucketSize]
 		}
 	}
 	return nodes

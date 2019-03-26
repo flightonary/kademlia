@@ -5,8 +5,9 @@ import (
 )
 
 const KadIdLen = 160 // bits
+const KadIdLenByte = KadIdLen / 8 // bytes
 
-type KadID [KadIdLen / 8]byte
+type KadID [KadIdLenByte]byte
 
 type Node struct {
 	Id   KadID
