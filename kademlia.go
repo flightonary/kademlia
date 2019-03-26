@@ -127,7 +127,7 @@ func (kad *Kademlia) mainRoutine() {
 				switch query := kadMsg.Body.(type) {
 				case *findNodeQuery:
 					// TODO: check if the message is for me
-					kadlog.debugf("receive FindNodeQuery from Node(%x)", kadMsg.Origin.Id)
+					kadlog.debugf("receive FindNodeQuery from Node(%x)", kadMsg.Origin.Id[0:4])
 					// reply with closest nodes
 					closest := kad.rt.closest(&query.Target)
 					err := kad.sendFindNodeReply(rcvMsg.srcIp, rcvMsg.srcPort, kadMsg.QuerySN, closest)
@@ -137,7 +137,7 @@ func (kad *Kademlia) mainRoutine() {
 					// add source node to routing table
 					kad.rt.add(kadMsg.Origin)
 				case *findNodeReply:
-					kadlog.debugf("receive FindNodeReply from Node(%x)", kadMsg.Origin.Id)
+					kadlog.debugf("receive FindNodeReply from Node(%x)", kadMsg.Origin.Id[0:4])
 					// add source node to routing table
 					// TODO: move node to last of list when Origin is known
 					kad.rt.add(kadMsg.Origin)
@@ -152,13 +152,13 @@ func (kad *Kademlia) mainRoutine() {
 						}
 					}
 				case *storeQuery:
-					kadlog.debugf("receive StoreQuery from Node(%x)", kadMsg.Origin.Id)
+					kadlog.debugf("receive StoreQuery from Node(%x)", kadMsg.Origin.Id[0:4])
 					// TODO: add node to routing table if it's unknown
 					// TODO: move node to last of list if it's known
 					kad.store.Put(query.Key, query.Data)
 					// TODO: send StoreReply
 				case *findValueQuery:
-					kadlog.debugf("receive FindValueQuery from Node(%x)", kadMsg.Origin.Id)
+					kadlog.debugf("receive FindValueQuery from Node(%x)", kadMsg.Origin.Id[0:4])
 					hasValue := kad.store.Exist(query.Key)
 					data := kad.store.Get(query.Key)
 					var closest []*Node
@@ -168,7 +168,7 @@ func (kad *Kademlia) mainRoutine() {
 						kadlog.debug(err)
 					}
 				case *findValueReply:
-					kadlog.debugf("receive FindValueReply from Node(%x)", kadMsg.Origin.Id)
+					kadlog.debugf("receive FindValueReply from Node(%x)", kadMsg.Origin.Id[0:4])
 					if query.HasValue {
 						if kad.findValueCallback != nil {
 							kad.findValueCallback(query.Key, query.Value)
@@ -216,7 +216,7 @@ func (kad *Kademlia) SendFindNodeQuery(ip net.IP, port int, target KadID) error 
 	kadMsg.QuerySN = kad.newSN()
 	kadMsg.TypeId = typeFindNodeQuery
 	kadMsg.Body = &findNodeQuery{target}
-	kadlog.debugf("send FindNodeQuery to Node(%x)", target)
+	kadlog.debugf("send FindNodeQuery to Node(%x)", target[0:4])
 	return kad.sendKadMsg(ip, port, kadMsg)
 }
 
@@ -234,7 +234,7 @@ func (kad *Kademlia) sendStoreQuery(node *Node, key string) error {
 	kadMsg.TypeId = typeStoreQuery
 	kadMsg.QuerySN = kad.newSN()
 	kadMsg.Body = &storeQuery{key, kad.store.Get(key)}
-	kadlog.debugf("send StoreQuery to Node(%x)", node.Id)
+	kadlog.debugf("send StoreQuery to Node(%x)", node.Id[0:4])
 	return kad.sendKadMsg(node.IP, node.Port, kadMsg)
 }
 
@@ -243,7 +243,7 @@ func (kad *Kademlia) sendFindValueQuery(node *Node, key string) error {
 	kadMsg.TypeId = typeFindValueQuery
 	kadMsg.QuerySN = kad.newSN()
 	kadMsg.Body = &findValueQuery{key}
-	kadlog.debugf("send FindValueQuery to Node(%x)", node.Id)
+	kadlog.debugf("send FindValueQuery to Node(%x)", node.Id[0:4])
 	return kad.sendKadMsg(node.IP, node.Port, kadMsg)
 }
 
