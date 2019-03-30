@@ -67,11 +67,13 @@ func (rt *routingTable) closer(kid *KadID) []*Node {
 			tmp = append(tmp, list2slice(rt.table[lower])...)
 		}
 		sort.Slice(tmp, func(i, j int) bool {
+			iXor := xor(&tmp[i].Id, kid)
+			jXor := xor(&tmp[j].Id, kid)
 			for ii := 0; ii < KadIdLenByte; ii++ {
-				if tmp[i].Id[ii] == tmp[j].Id[ii] {
+				if iXor[ii] == jXor[ii] {
 					continue
 				}
-				return tmp[i].Id[ii] < tmp[j].Id[ii]
+				return iXor[ii] < jXor[ii]
 			}
 			return true
 		})
@@ -103,9 +105,13 @@ func (rt *routingTable) index(kid *KadID) int {
 }
 
 func (rt *routingTable) xor(kid *KadID) *KadID {
+	return xor(rt.ownId, kid)
+}
+
+func xor(kid1 *KadID, kid2 *KadID) *KadID {
 	xor := &KadID{}
-	for i := range kid {
-		xor[i] = rt.ownId[i] ^ kid[i]
+	for i := range kid1 {
+		xor[i] = kid1[i] ^ kid2[i]
 	}
 	return xor
 }
