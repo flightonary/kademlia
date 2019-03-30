@@ -3,7 +3,6 @@ package kademlia
 import (
 	"container/list"
 	"fmt"
-	"reflect"
 	"testing"
 )
 
@@ -80,7 +79,6 @@ func Test_routingTable_add(t *testing.T) {
 		fields fields
 		args   args
 		want   bool
-		want1  *Node
 		finally func(*routingTable) (bool, string)
 	}{
 		{
@@ -91,7 +89,6 @@ func Test_routingTable_add(t *testing.T) {
 			},
 			args: args{node: &node},
 			want: true,
-			want1: nil,
 			finally: func(rt *routingTable) (bool, string) {
 				index := rt.index(&node.Id)
 				e := rt.table[index].Front()
@@ -111,12 +108,9 @@ func Test_routingTable_add(t *testing.T) {
 				ownId: tt.fields.ownId,
 				table: tt.fields.table,
 			}
-			got, got1 := rt.add(tt.args.node)
+			got := rt.add(tt.args.node)
 			if got != tt.want {
 				t.Errorf("routingTable.add() got = %v, want %v", got, tt.want)
-			}
-			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("routingTable.add() got1 = %v, want %v", got1, tt.want1)
 			}
 			if tt.finally != nil {
 				success, errMsg := tt.finally(rt)
