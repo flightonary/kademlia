@@ -3,9 +3,9 @@ package kademlia
 import "log"
 
 const (
-	logLevelDebug = iota
-	logLevelInfo
-	logLevelDisable
+	logLevelDebug   = iota
+	logLevelInfo    = iota
+	logLevelDisable = iota
 )
 
 const (
