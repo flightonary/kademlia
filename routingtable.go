@@ -56,9 +56,9 @@ func (rt *routingTable) closer(kid *KadID) []*Node {
 
 	closestIndex := rt.index(kid)
 	nodes := list2slice(rt.table[closestIndex])
-	for i := 0; i < KadIdLen; i++ {
-		upper := closestIndex + 1
-		lower := closestIndex - 1
+	for i := 1; i < KadIdLen; i++ {
+		upper := closestIndex + i
+		lower := closestIndex - i
 		tmp := make([]*Node, 0)
 		if upper < KadIdLen {
 			tmp = append(tmp, list2slice(rt.table[upper])...)
