@@ -2,7 +2,7 @@ Kademlia
 ==========
 
 This is a golang implementation of a Kademlia for the purpose of studying.
-It is not recommended to use it for production environment.
+It is not recommended to use for production environment.
 
 Installation
 ------------
